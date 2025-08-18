@@ -13,7 +13,13 @@
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#jump4">4.数据结构体</a><br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#jump5">5.多语言</a><br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#jump6">6.UI系统</a><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#jump7">7.自定义数据结构</a><br>
 其余功能如存档，道具和任务系统，角色控制，场景可交互事件等等由Prefab提供。<br>
+<br>
+<br>
+<span id="jump7"><b>7.自定义数据结构： </b><a href="#jump">返回目录</a></span><br>
+本框架支持用户方便地扩展自己的数据结构，例如敌人，技能，商店等等。
+详细的说明文档请见 <a href="DOCUMENTATION.md">DOCUMENTATION.md</a><br>
 
 <br/>
 <span id="jump1"><b>1.流程控制： </b><a href="#jump">返回目录</a></span><br>
