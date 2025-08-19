@@ -42,7 +42,7 @@ namespace ManagerSpace
         // 调查提示框
         [SerializeField]
         private GameObject canDoHint;
-        // 多选面板
+        // 多选面板的预制件
         [SerializeField]
         private GameObject multiChoosePanel;
 
@@ -531,17 +531,26 @@ namespace ManagerSpace
             menuPanel = menu;
         }
 
+        /// <summary>
+        /// 实例化并显示多项选择UI面板。
+        /// </summary>
+        /// <param name="choices">要显示的选项文本列表。</param>
+        /// <param name="callback">当玩家做出选择后要执行的回调，参数为所选项的索引。</param>
         public void showMultiChoosePanel(List<string> choices, System.Action<int> callback)
         {
             if (multiChoosePanel != null)
             {
+                // 实例化预制件
                 GameObject go = Instantiate(multiChoosePanel) as GameObject;
+                // 设置其父节点为Canvas
                 go.transform.SetParent(GameObject.Find("Canvas").GetComponent<RectTransform>());
                 go.transform.localPosition = Vector2.zero;
 
+                // 获取面板脚本组件
                 multiChoosePanel panel = go.GetComponent<multiChoosePanel>();
                 if (panel != null)
                 {
+                    // 调用面板的设置方法
                     panel.showChoices(choices, callback);
                 }
                 else

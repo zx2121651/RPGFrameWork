@@ -304,30 +304,36 @@ namespace Actions
                     break;
 
                 case eventType.ShowChoices:
+                    // 获取当前事件节点的所有子节点，每个子节点代表一个选项
                     var children = toDo.getChildren();
                     if (children != null && children.Count > 0)
                     {
+                        // 创建一个列表来存储选项的显示文本
                         List<string> choices = new List<string>();
                         foreach (var child in children)
                         {
+                            // 从每个子节点的 str1 属性中获取选项文本
                             choices.Add(child.getData<string>(structProperty.str1));
                         }
 
+                        // 调用UI管理器显示选项面板，并传入一个回调函数
                         a.showMultiChoosePanel(choices, (selectedIndex) => {
+                            // 当玩家做出选择后，此回调函数被执行
                             if (selectedIndex >= 0 && selectedIndex < children.Count)
                             {
+                                // 如果选择有效，则将对应的子节点作为下一个事件推入堆栈，实现分支
                                 pushNow(true, children[selectedIndex]);
                             }
                             else
                             {
-                                // Handle case where choice is invalid or cancelled, for now just continue
+                                // 如果选择无效或被取消，则不进行分支，直接继续执行后续事件
                                 pushNow(true);
                             }
                         });
                     }
                     else
                     {
-                        // No choices defined, just continue the event flow
+                        // 如果ShowChoices节点下没有定义子节点（即没有选项），则直接跳过
                         pushNow(true);
                     }
                     break;

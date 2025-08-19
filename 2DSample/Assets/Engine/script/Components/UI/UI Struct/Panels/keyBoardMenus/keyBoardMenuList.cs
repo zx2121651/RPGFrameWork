@@ -79,12 +79,13 @@ namespace UI
                         f.NoneImg = data.NoneImg;
                         f.NoneText = data.NoneText;
 
-                        // Add MouseInputHandler and set its parent
+                        // 为实例化的列表项挂载鼠标输入处理器
                         MouseInputHandler handler = g.GetComponent<MouseInputHandler>();
                         if (handler == null)
                         {
                             handler = g.AddComponent<MouseInputHandler>();
                         }
+                        // 将其父菜单设置为本实例，以便回调
                         handler.parentMenu = this;
 
                         listItems.Add(f);
@@ -322,14 +323,22 @@ namespace UI
             b.interactable = able;
         }
 
+        /// <summary>
+        /// 通过鼠标事件直接设置当前选中的项目。
+        /// </summary>
+        /// <param name="item">被鼠标悬停的UI项的GameObject</param>
         public void setSelection(GameObject item)
         {
+            // 在列表中查找传入的UI项的索引
             int index = listItems.FindIndex(listItem => listItem.gameObject == item);
 
+            // 如果找到了该项
             if (index != -1)
             {
+                // 将一维索引转换为二维的光标坐标
                 int x = index % optionNum.x;
                 int y = index / optionNum.x;
+                // 设置光标到新的位置
                 setCursorPos(x, y);
             }
         }

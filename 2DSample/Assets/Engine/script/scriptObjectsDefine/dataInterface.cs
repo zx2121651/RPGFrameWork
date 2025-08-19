@@ -121,7 +121,7 @@ public enum eventType
     setFollow,
     changeTeam,
     changeGlobalVector3,
-    ShowChoices
+    ShowChoices // 显示多项选择框
 }
 
 public enum actorComponentType
