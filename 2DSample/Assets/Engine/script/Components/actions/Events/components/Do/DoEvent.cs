@@ -303,6 +303,35 @@ namespace Actions
                     }
                     break;
 
+                case eventType.ShowChoices:
+                    var children = toDo.getChildren();
+                    if (children != null && children.Count > 0)
+                    {
+                        List<string> choices = new List<string>();
+                        foreach (var child in children)
+                        {
+                            choices.Add(child.getData<string>(structProperty.str1));
+                        }
+
+                        a.showMultiChoosePanel(choices, (selectedIndex) => {
+                            if (selectedIndex >= 0 && selectedIndex < children.Count)
+                            {
+                                pushNow(true, children[selectedIndex]);
+                            }
+                            else
+                            {
+                                // Handle case where choice is invalid or cancelled, for now just continue
+                                pushNow(true);
+                            }
+                        });
+                    }
+                    else
+                    {
+                        // No choices defined, just continue the event flow
+                        pushNow(true);
+                    }
+                    break;
+
                // default 会造成混乱，严禁出现
             }
         }

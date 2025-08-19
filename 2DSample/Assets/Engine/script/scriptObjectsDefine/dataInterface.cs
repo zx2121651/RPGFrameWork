@@ -120,7 +120,8 @@ public enum eventType
     If,
     setFollow,
     changeTeam,
-    changeGlobalVector3
+    changeGlobalVector3,
+    ShowChoices
 }
 
 public enum actorComponentType

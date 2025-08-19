@@ -42,6 +42,9 @@ namespace ManagerSpace
         // 调查提示框
         [SerializeField]
         private GameObject canDoHint;
+        // 多选面板
+        [SerializeField]
+        private GameObject multiChoosePanel;
 
         // 显示文字时的音效
         [SerializeField]
@@ -526,6 +529,31 @@ namespace ManagerSpace
         public void setMainMenu(GameObject menu)
         {
             menuPanel = menu;
+        }
+
+        public void showMultiChoosePanel(List<string> choices, System.Action<int> callback)
+        {
+            if (multiChoosePanel != null)
+            {
+                GameObject go = Instantiate(multiChoosePanel) as GameObject;
+                go.transform.SetParent(GameObject.Find("Canvas").GetComponent<RectTransform>());
+                go.transform.localPosition = Vector2.zero;
+
+                multiChoosePanel panel = go.GetComponent<multiChoosePanel>();
+                if (panel != null)
+                {
+                    panel.showChoices(choices, callback);
+                }
+                else
+                {
+                    Debug.LogError("multiChoosePanel prefab does not have the multiChoosePanel script component.");
+                    Destroy(go);
+                }
+            }
+            else
+            {
+                Debug.LogError("multiChoosePanel prefab is not assigned in the UIManager.");
+            }
         }
     }
 }
