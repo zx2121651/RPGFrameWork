@@ -13,4 +13,5 @@ public interface keyboardMenuInterface
     void doOption();
     void cancel();
     void changeSize();
+    void setSelection(GameObject item);
 }

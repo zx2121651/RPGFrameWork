@@ -78,6 +78,15 @@ namespace UI
                         var f = g.GetComponent<listItemUI>();
                         f.NoneImg = data.NoneImg;
                         f.NoneText = data.NoneText;
+
+                        // Add MouseInputHandler and set its parent
+                        MouseInputHandler handler = g.GetComponent<MouseInputHandler>();
+                        if (handler == null)
+                        {
+                            handler = g.AddComponent<MouseInputHandler>();
+                        }
+                        handler.parentMenu = this;
+
                         listItems.Add(f);
                     }
             }
@@ -311,6 +320,18 @@ namespace UI
         {
             var b = listItems[_index].gameObject.GetComponent<Button>();
             b.interactable = able;
+        }
+
+        public void setSelection(GameObject item)
+        {
+            int index = listItems.FindIndex(listItem => listItem.gameObject == item);
+
+            if (index != -1)
+            {
+                int x = index % optionNum.x;
+                int y = index / optionNum.x;
+                setCursorPos(x, y);
+            }
         }
     }
 }
