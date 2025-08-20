@@ -5,14 +5,24 @@ using System.Collections.Generic;
 
 namespace BaseData
 {
+    /// <summary>
+    /// 数据节点的核心，用于通过反射获取和存储一个对象的所有公共属性。
+    /// 这是框架实现通用数据访问的基础。
+    /// </summary>
     public class DataNode
     {
+        // 存储属性信息
         private PropertyInfo[] infos;
+        // 存储属性对应的实际数据
         private object[] datas;
 
+        /// <summary>
+        /// 构造函数，传入一个对象，通过反射获取其所有公共属性。
+        /// </summary>
+        /// <param name="o">要提取数据的对象。</param>
         public DataNode(object o)
         {
-            // 只有set get封装过的public变量才会被识别到
+            // 注意：只有用 { get; set; } 封装过的 public 属性才会被 GetProperties() 识别到。
             infos = o.GetType().GetProperties();
             datas = new object[infos.Length];
             for (int i = 0; i < datas.Length; i++)
@@ -21,9 +31,11 @@ namespace BaseData
             }
         }
 
+        /// <summary>
+        /// 根据属性名获取属性的类型。
+        /// </summary>
         public Type getType(string name)
         {
-            // foreach内没法增减列表成员
             foreach (var i in infos)
             {
                 if (i.Name == name)
@@ -32,6 +44,9 @@ namespace BaseData
             return null;
         }
 
+        /// <summary>
+        /// 根据属性名获取数据。
+        /// </summary>
         public object getData(string name)
         {
             for (int i = 0; i < infos.Length; i++)
@@ -42,12 +57,18 @@ namespace BaseData
             return null;
         }
 
+        /// <summary>
+        /// 根据属性名获取指定类型的数据（泛型版本）。
+        /// </summary>
         public T getData<T>(string name)
         {
             return (T)getData(name);
         }
     }
 
+    /// <summary>
+    /// 实现了 dataNodeInterface 接口的基类，封装了一个 DataNode 实例。
+    /// </summary>
     public class DataBaseNode : dataNodeInterface
     {
         protected DataNode node = null;
@@ -68,6 +89,9 @@ namespace BaseData
         }
     }
 
+    /// <summary>
+    /// 列表节点的基类，在 DataBaseNode 的基础上增加了 id 属性。
+    /// </summary>
     public class ListNode : DataBaseNode, ListNodeInterface
     {
         public string id;
@@ -79,13 +103,20 @@ namespace BaseData
 
         public int getNodeType()
         {
+            // 从反射获取的数据中查找类型信息
             return (int)node.getData(propertyName.type);
         }
     }
 
+    /// <summary>
+    /// 树节点的基类，在 ListNode 的基础上增加了父子关系。
+    /// 主要用于事件系统。
+    /// </summary>
     public class TreeNode : ListNode, TreeNodeInterface
     {
+        // 子节点列表
         protected List<TreeNodeInterface> children = new List<TreeNodeInterface>();
+        // 父节点列表
         protected List<TreeNodeInterface> parents = new List<TreeNodeInterface>();
 
         public TreeNodeInterface getChild(string id)
@@ -153,7 +184,5 @@ namespace BaseData
         {
             return parents;
         }
-
-
     }
 }

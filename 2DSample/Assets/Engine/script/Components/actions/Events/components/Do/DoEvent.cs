@@ -56,253 +56,25 @@ namespace Actions
             }
         }
 
-        // 公用的写在这里，各自个性化的写在dosth里
+        /// <summary>
+        /// 执行单个事件节点的具体逻辑。
+        /// 这是事件系统的核心解释器。
+        /// </summary>
+        /// <param name="toDo">要执行的事件树节点。</param>
         override public void doSth(TreeNodeInterface toDo)
         {
+            // 将事件节点中的数据解包到一个 eventStruct 中，方便访问
             eventStruct e = new eventStruct(toDo);
 
+            // 根据事件类型执行不同的操作
             switch (e.type)
             {
-                // =============================== 空操作 ===============================
+                // =============================== 流程控制 ===============================
+                // 空操作，直接进入下一个事件
                 case eventType.none: pushNow(true); break;
+                // If 条件事件，其逻辑在检查子节点条件时处理，此处仅作为流程节点
                 case eventType.If: pushNow(true); break;
-
-                // =============================== 其他操作 ===============================
-                case eventType.beBlack: beBlack(e.float1); break;
-                case eventType.beWhite: beWhite(e.float1); break;
-                case eventType.wait: waitForTime(e.float1); break;
-                case eventType.startUserControl: pushNow(true); startUserControl(); break;
-                case eventType.stopUserControl: pushNow(true); a.stopUserControl(); break;
-                case eventType.changeGlobalInt:
-                    calValue cal = e.howToCal;
-                    int u = a.getInt(e.str1);
-                    if (cal == calValue.add)
-                        a.setInt(e.str1, u + e.int1);
-                    else if (cal == calValue.minus)
-                        a.setInt(e.str1, u - e.int1);
-                    else if (cal == calValue.multiply)
-                        a.setInt(e.str1, u * e.int1);
-                    else if (cal == calValue.divide)
-                        a.setInt(e.str1, u / e.int1);
-                    else
-                        a.setInt(e.str1, e.int1);
-                    pushNow(true); break;
-                case eventType.changeGlobalDouble:
-                    cal = e.howToCal;
-                    double y = a.getDouble(e.str1);
-                    if (cal == calValue.add)
-                        a.setDouble(e.str1, y + e.float1);
-                    else if (cal == calValue.minus)
-                        a.setDouble(e.str1, y - e.float1);
-                    else if (cal == calValue.multiply)
-                        a.setDouble(e.str1, y * e.float1);
-                    else if (cal == calValue.divide)
-                        a.setDouble(e.str1, y / e.float1);
-                    else
-                        a.setDouble(e.str1, e.float1);
-                    pushNow(true); break;
-                case eventType.changeGlobalVector3:
-                    cal = e.howToCal;
-                    Vector3 v = a.getVec3(e.str1);
-                    if (cal == calValue.add)
-                        a.setVec3(e.str1, v + e.vec1);
-                    else if (cal == calValue.minus)
-                        a.setVec3(e.str1, v - e.vec1);
-                    else if (cal == calValue.multiply)
-                        a.setVec3(e.str1, v * e.vec1.x);
-                    else if (cal == calValue.divide)
-                        a.setVec3(e.str1, v / e.vec1.x);
-                    else
-                        a.setVec3(e.str1, e.vec1);
-                    pushNow(true); break;
-                case eventType.changeGlobalSwith:
-                    a.setSwitch(e.str1, e.bool1);
-                    pushNow(true); break;
-                case eventType.debugLog:
-                    Debug.Log(a.findText(e.str1,language.none));
-                    pushNow(true); break;
-                case eventType.playBgm:
-                    a.playMusic(a.findAudio(e.str1));
-                    pushNow(true); break;
-                case eventType.stopBgm:
-                    a.stopMusic();
-                    pushNow(true); break;
-                case eventType.playBgs:
-                    a.playBGS(a.findAudio(e.str1));
-                    pushNow(true); break;
-                case eventType.stopBgs:
-                    a.stopBGS();
-                    pushNow(true); break;
-                case eventType.playSE:
-                    a.playSE(a.findAudio(e.str1), a.findPitch(e.str1));
-                    pushNow(true); break;
-                case eventType.showPic:
-                    a.showPicPanel(e.str1, e.vec1, a.findImg(e.str2), e.float1 / 255.0f);
-                    pushNow(true); break;
-                case eventType.movePic:
-                    a.movePicPanel(e.str1, e.vec1, e.float1 / 255.0f, e.float2);
-                    if (e.bool1)
-                        waitForTime(e.float2);
-                    else
-                        pushNow(true);
-                    break;
-                case eventType.hidePic:
-                    pushNow(true);
-                    a.hidePicPanel(e.str1); break;
-                case eventType.textSpecial:
-                    string text = a.findText(e.str1, getSetting().nowlang);
-                    showSpecialTextPanel(a, text, e.vec1, a.findAudio(e.str2), a.findPitch(e.str2));
-                    break;
-                case eventType.changeScene:
-                    pushNow(true);
-                    changeSceneDo csd = new changeSceneDo(a.getTeam()[0], e.vec1, e.turn);
-                    a.loadLevel(e.str1, csd);
-                    break;
-                case eventType.playAnima:
-                    var prefab = spawnPrefab(e.str1, e.vec1);
-                    var animator = prefab.GetComponent<Animator>();
-                    AnimationClip clip = animator.runtimeAnimatorController.animationClips[0];
-                    var speed = animator.GetCurrentAnimatorStateInfo(0).speed;
-                    var time = clip.length / (speed * speed);
-                    if (e.bool1)
-                        waitForTime(time);
-                    else
-                        pushNow(true);
-                    break;
-                case eventType.moveCamera:
-                    CameraMoveToSw(e.vec1, e.float1);
-                    break;
-                case eventType.sbMoveToSw:
-                    GameObject g = null;
-                    if (e.findType == findType.tag)
-                        g = GameObject.FindGameObjectWithTag(e.str1);
-                    else if (e.findType == findType.name)
-                        g = GameObject.Find(e.str1);
-                    if (g.GetComponent<ActorInterface>() == null)
-                        g = g.transform.GetChild(0).gameObject;
-                    if (g == null)
-                        Debug.LogError("未找到物体");
-                    else
-                    {
-                        SbMoveToSw(g, e.vec1, e.turn);
-                    }
-                    break;
-                case eventType.changeThingPos:
-                    pushNow(true); g = null;
-                    if (e.findType == findType.tag)
-                        g = GameObject.FindGameObjectWithTag(e.str1);
-                    else if (e.findType == findType.name)
-                        g = GameObject.Find(e.str1);
-                    if (g == null)
-                        Debug.LogError("未找到物体");
-                    else
-                    {
-                        changeThingPos(g, e.vec1);
-                    }
-                    break;
-                case eventType.changeTurn:
-                    g = null;
-                    if (e.findType == findType.tag)
-                        g = GameObject.FindGameObjectWithTag(e.str1);
-                    else if (e.findType == findType.name)
-                        g = GameObject.Find(e.str1);
-
-                    if (g == null)
-                        Debug.LogError("未找到物体");
-                    else
-                    {
-                        if (g.GetComponent<ActorInterface>() == null)
-                            g = g.transform.GetChild(0).gameObject;
-                        setActorTurn(g, e.turn);
-                    }
-                    break;
-                case eventType.changeThingActive:
-                    pushNow(true); g = null; // 注意find函数无法查找隐藏的物体，需要给物体添加父物体以设置其可见性，且父子物体不可重名
-                    if (e.findType == findType.tag)
-                    {
-                        if (e.str1 == HashsAndTags.player)
-                            g = a.Player.gameObject;
-                        else
-                            g = GameObject.FindGameObjectWithTag(e.str1).transform.GetChild(0).gameObject;
-                    }
-                    else if (e.findType == findType.name)
-                        g = GameObject.Find(e.str1).transform.GetChild(0).gameObject;
-
-                    if (g == null)
-                        Debug.LogError("未找到物体");
-                    else
-                        g.SetActive(e.bool1);
-                    break;
-                case eventType.showSavePanel:
-                    pushNow();
-                    a.showSavePanel();
-                    break;
-                case eventType.changeItem:
-                    a.getItem(e.str1, e.int1);
-                    var n = a.getItemInfo(e.str1).getData<string>(itemProperty.name);
-                    int num = Mathf.Abs(e.int1);
-                    if(num>0)
-                        showHint(a.findText(n, getSetting().nowlang) + (e.int1>0?" +": " -") + num);
-                    break;
-                case eventType.flashScreen:
-                    a.showFlash(e.color1, e.float1);
-                    if (e.bool1)
-                        waitForTime(e.float1);
-                    else
-                        pushNow(true);
-                    break;
-                case eventType.shakeScreen:
-                    ShakeCamera(e.float2, e.float1);
-                    if (e.bool1)
-                        waitForTime(e.float1);
-                    else
-                        pushNow(true);
-                    break;
-                case eventType.startQuest:
-                    a.addQuest(e.str1);
-                    pushNow(true);
-                    break;
-                case eventType.changeQuest:
-                    a.changeQuest(e.str1, e.questStatus);
-                    pushNow(true);
-                    break;
-                case eventType.changeWeather:
-
-                    pushNow(true);
-                    break;
-                case eventType.setFollow:
-                    g = null;
-                    if (e.findType == findType.tag)
-                    {
-                        g = GameObject.FindGameObjectWithTag(e.str1);
-                    }
-                    else if (e.findType == findType.name)
-                        g = GameObject.Find(e.str1);
-
-                    if(g==null)
-                        Debug.LogError("未找到物体");
-                    else
-                    {
-                        GameObject g2 = Instantiate(getSystemSetting().PlayerInfos[e.int1].playerPrefab);
-                        g2.transform.position = g.transform.position;
-                        setFollow(g2, e.bool1);
-                    }                  
-                    pushNow(true);
-                    break;
-                case eventType.changeTeam:
-                    n = a.getSystemSetting().PlayerInfos[e.int1].name;
-                    if (e.bool1)
-                    {
-                        inTeam(e.int1);
-                        showHint(a.findText(n, getSetting().nowlang) + a.findText("sys.inTeam", getSetting().nowlang));
-                    }
-                    else
-                    {
-                        outTeam(e.int1);
-                        showHint(a.findText(n, getSetting().nowlang) + a.findText("sys.outTeam", getSetting().nowlang));
-                    }
-                    break;
-
+                // 显示多项选择
                 case eventType.ShowChoices:
                     // 获取当前事件节点的所有子节点，每个子节点代表一个选项
                     var children = toDo.getChildren();
@@ -336,6 +108,233 @@ namespace Actions
                         // 如果ShowChoices节点下没有定义子节点（即没有选项），则直接跳过
                         pushNow(true);
                     }
+                    break;
+
+                // =============================== 场景与玩家控制 ===============================
+                // 开始玩家控制
+                case eventType.startUserControl: pushNow(true); startUserControl(); break;
+                // 停止玩家控制
+                case eventType.stopUserControl: pushNow(true); a.stopUserControl(); break;
+                // 切换场景
+                case eventType.changeScene:
+                    pushNow(true);
+                    changeSceneDo csd = new changeSceneDo(a.getTeam()[0], e.vec1, e.turn);
+                    a.loadLevel(e.str1, csd);
+                    break;
+                // 移动镜头
+                case eventType.moveCamera:
+                    CameraMoveToSw(e.vec1, e.float1);
+                    break;
+
+                // =============================== 变量与数据 ===============================
+                // 修改全局整数
+                case eventType.changeGlobalInt:
+                    calValue cal = e.howToCal;
+                    int u = a.getInt(e.str1);
+                    if (cal == calValue.add) a.setInt(e.str1, u + e.int1);
+                    else if (cal == calValue.minus) a.setInt(e.str1, u - e.int1);
+                    else if (cal == calValue.multiply) a.setInt(e.str1, u * e.int1);
+                    else if (cal == calValue.divide) a.setInt(e.str1, u / e.int1);
+                    else a.setInt(e.str1, e.int1);
+                    pushNow(true); break;
+                // 修改全局浮点数
+                case eventType.changeGlobalDouble:
+                    cal = e.howToCal;
+                    double y = a.getDouble(e.str1);
+                    if (cal == calValue.add) a.setDouble(e.str1, y + e.float1);
+                    else if (cal == calValue.minus) a.setDouble(e.str1, y - e.float1);
+                    else if (cal == calValue.multiply) a.setDouble(e.str1, y * e.float1);
+                    else if (cal == calValue.divide) a.setDouble(e.str1, y / e.float1);
+                    else a.setDouble(e.str1, e.float1);
+                    pushNow(true); break;
+                // 修改全局三维向量
+                case eventType.changeGlobalVector3:
+                    cal = e.howToCal;
+                    Vector3 v = a.getVec3(e.str1);
+                    if (cal == calValue.add) a.setVec3(e.str1, v + e.vec1);
+                    else if (cal == calValue.minus) a.setVec3(e.str1, v - e.vec1);
+                    else if (cal == calValue.multiply) a.setVec3(e.str1, v * e.vec1.x);
+                    else if (cal == calValue.divide) a.setVec3(e.str1, v / e.vec1.x);
+                    else a.setVec3(e.str1, e.vec1);
+                    pushNow(true); break;
+                // 修改全局开关
+                case eventType.changeGlobalSwith:
+                    a.setSwitch(e.str1, e.bool1);
+                    pushNow(true); break;
+                // 改变道具数量
+                case eventType.changeItem:
+                    a.getItem(e.str1, e.int1);
+                    var n = a.getItemInfo(e.str1).getData<string>(itemProperty.name);
+                    int num = Mathf.Abs(e.int1);
+                    if(num>0)
+                        showHint(a.findText(n, getSetting().nowlang) + (e.int1>0?" +": " -") + num);
+                    break;
+                // 开始一个任务
+                case eventType.startQuest:
+                    a.addQuest(e.str1);
+                    pushNow(true);
+                    break;
+                // 改变任务状态
+                case eventType.changeQuest:
+                    a.changeQuest(e.str1, e.questStatus);
+                    pushNow(true);
+                    break;
+                // 改变队伍成员
+                case eventType.changeTeam:
+                    n = a.getSystemSetting().PlayerInfos[e.int1].name;
+                    if (e.bool1)
+                    {
+                        inTeam(e.int1);
+                        showHint(a.findText(n, getSetting().nowlang) + a.findText("sys.inTeam", getSetting().nowlang));
+                    }
+                    else
+                    {
+                        outTeam(e.int1);
+                        showHint(a.findText(n, getSetting().nowlang) + a.findText("sys.outTeam", getSetting().nowlang));
+                    }
+                    break;
+
+                // =============================== 视觉效果 ===============================
+                // 淡入
+                case eventType.beBlack: beBlack(e.float1); break;
+                // 淡出
+                case eventType.beWhite: beWhite(e.float1); break;
+                // 等待
+                case eventType.wait: waitForTime(e.float1); break;
+                 // 显示图片
+                case eventType.showPic:
+                    a.showPicPanel(e.str1, e.vec1, a.findImg(e.str2), e.float1 / 255.0f);
+                    pushNow(true); break;
+                // 移动图片
+                case eventType.movePic:
+                    a.movePicPanel(e.str1, e.vec1, e.float1 / 255.0f, e.float2);
+                    if (e.bool1) waitForTime(e.float2);
+                    else pushNow(true);
+                    break;
+                // 隐藏图片
+                case eventType.hidePic:
+                    pushNow(true);
+                    a.hidePicPanel(e.str1); break;
+                // 显示特殊文本
+                case eventType.textSpecial:
+                    string text = a.findText(e.str1, getSetting().nowlang);
+                    showSpecialTextPanel(a, text, e.vec1, a.findAudio(e.str2), a.findPitch(e.str2));
+                    break;
+                // 播放动画
+                case eventType.playAnima:
+                    var prefab = spawnPrefab(e.str1, e.vec1);
+                    var animator = prefab.GetComponent<Animator>();
+                    AnimationClip clip = animator.runtimeAnimatorController.animationClips[0];
+                    var speed = animator.GetCurrentAnimatorStateInfo(0).speed;
+                    var time = clip.length / (speed * speed);
+                    if (e.bool1) waitForTime(time);
+                    else pushNow(true);
+                    break;
+                // 屏幕闪烁
+                case eventType.flashScreen:
+                    a.showFlash(e.color1, e.float1);
+                    if (e.bool1) waitForTime(e.float1);
+                    else pushNow(true);
+                    break;
+                // 屏幕震动
+                case eventType.shakeScreen:
+                    ShakeCamera(e.float2, e.float1);
+                    if (e.bool1) waitForTime(e.float1);
+                    else pushNow(true);
+                    break;
+
+                // =============================== 音频 ===============================
+                // 播放BGM
+                case eventType.playBgm:
+                    a.playMusic(a.findAudio(e.str1));
+                    pushNow(true); break;
+                // 停止BGM
+                case eventType.stopBgm:
+                    a.stopMusic();
+                    pushNow(true); break;
+                // 播放BGS (背景音效)
+                case eventType.playBgs:
+                    a.playBGS(a.findAudio(e.str1));
+                    pushNow(true); break;
+                // 停止BGS
+                case eventType.stopBgs:
+                    a.stopBGS();
+                    pushNow(true); break;
+                // 播放SE (音效)
+                case eventType.playSE:
+                    a.playSE(a.findAudio(e.str1), a.findPitch(e.str1));
+                    pushNow(true); break;
+
+                // =============================== 场景物体操作 ===============================
+                // 移动场景物体
+                case eventType.sbMoveToSw:
+                    GameObject g = null;
+                    if (e.findType == findType.tag) g = GameObject.FindGameObjectWithTag(e.str1);
+                    else if (e.findType == findType.name) g = GameObject.Find(e.str1);
+                    if (g.GetComponent<ActorInterface>() == null) g = g.transform.GetChild(0).gameObject;
+                    if (g == null) Debug.LogError("未找到物体");
+                    else { SbMoveToSw(g, e.vec1, e.turn); }
+                    break;
+                // 改变物体位置
+                case eventType.changeThingPos:
+                    pushNow(true); g = null;
+                    if (e.findType == findType.tag) g = GameObject.FindGameObjectWithTag(e.str1);
+                    else if (e.findType == findType.name) g = GameObject.Find(e.str1);
+                    if (g == null) Debug.LogError("未找到物体");
+                    else { changeThingPos(g, e.vec1); }
+                    break;
+                // 改变物体朝向
+                case eventType.changeTurn:
+                    g = null;
+                    if (e.findType == findType.tag) g = GameObject.FindGameObjectWithTag(e.str1);
+                    else if (e.findType == findType.name) g = GameObject.Find(e.str1);
+                    if (g == null) Debug.LogError("未找到物体");
+                    else
+                    {
+                        if (g.GetComponent<ActorInterface>() == null) g = g.transform.GetChild(0).gameObject;
+                        setActorTurn(g, e.turn);
+                    }
+                    break;
+                // 改变物体激活状态 (显/隐)
+                case eventType.changeThingActive:
+                    pushNow(true); g = null; // 注意find函数无法查找隐藏的物体
+                    if (e.findType == findType.tag)
+                    {
+                        if (e.str1 == HashsAndTags.player) g = a.Player.gameObject;
+                        else g = GameObject.FindGameObjectWithTag(e.str1).transform.GetChild(0).gameObject;
+                    }
+                    else if (e.findType == findType.name) g = GameObject.Find(e.str1).transform.GetChild(0).gameObject;
+                    if (g == null) Debug.LogError("未找到物体");
+                    else g.SetActive(e.bool1);
+                    break;
+                // 设置跟随者
+                case eventType.setFollow:
+                    g = null;
+                    if (e.findType == findType.tag) g = GameObject.FindGameObjectWithTag(e.str1);
+                    else if (e.findType == findType.name) g = GameObject.Find(e.str1);
+                    if(g==null) Debug.LogError("未找到物体");
+                    else
+                    {
+                        GameObject g2 = Instantiate(getSystemSetting().PlayerInfos[e.int1].playerPrefab);
+                        g2.transform.position = g.transform.position;
+                        setFollow(g2, e.bool1);
+                    }                  
+                    pushNow(true);
+                    break;
+
+                // =============================== 系统与其他 ===============================
+                // 在控制台打印日志 (调试用)
+                case eventType.debugLog:
+                    Debug.Log(a.findText(e.str1,language.none));
+                    pushNow(true); break;
+                // 显示存档界面
+                case eventType.showSavePanel:
+                    pushNow();
+                    a.showSavePanel();
+                    break;
+                // 改变天气 (暂未实现)
+                case eventType.changeWeather:
+                    pushNow(true);
                     break;
 
                // default 会造成混乱，严禁出现

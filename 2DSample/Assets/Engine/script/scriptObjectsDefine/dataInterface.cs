@@ -3,72 +3,97 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-// =================================== enums ===================================
+// =================================== 全局枚举定义 ===================================
 
+/// <summary>
+/// 特殊值，通常用于表示“全部”或“任意”。
+/// </summary>
 public enum SpecialValue
 {
     all = -1
 }
 
+/// <summary>
+/// 任务类型。
+/// </summary>
 public enum questType
 {
     all = SpecialValue.all,
-    main,
-    side,
-    hidden
+    main,   // 主线
+    side,   // 支线
+    hidden  // 隐藏
 }
 
+/// <summary>
+/// 道具类型。
+/// </summary>
 public enum itemType
 {
     all = SpecialValue.all,
-    item,
-    notes,
-    food,
-    gifts
+    item,   // 普通道具
+    notes,  // 笔记
+    food,   // 食物
+    gifts   // 礼物
 }
 
+/// <summary>
+/// 任务状态。
+/// </summary>
 public enum questStatus
 {
-    doing,
-    finished,
-    failed,
-    all
+    doing,      // 进行中
+    finished,   // 已完成
+    failed,     // 已失败
+    all         // 全部
 }
 
-//触发条件
+/// <summary>
+/// 事件的触发条件。
+/// </summary>
 public enum start
 {
-    Z,
-    playerTouch,
-    eventTouch,
-    auto
+    Z,              // 按下确认键
+    playerTouch,    // 玩家接触
+    eventTouch,     // 事件接触（例如，一个移动的NPC撞到另一个NPC）
+    auto            // 自动执行
 }
 
-// 需要玩家朝向
+/// <summary>
+/// 角色朝向。
+/// </summary>
 public enum turn
 {
     up,
     down,
     left,
     right,
-    all
+    all // 任意方向
 }
 
+/// <summary>
+/// 数值计算方式。
+/// </summary>
 public enum calValue
 {
-    add,
-    minus,
-    multiply,
-    divide,
-    set
+    add,        // 加
+    minus,      // 减
+    multiply,   // 乘
+    divide,     // 除
+    set         // 直接赋值
 }
 
+/// <summary>
+/// 查找游戏对象的方式。
+/// </summary>
 public enum findType
 {
-    name,
-    tag
+    name, // 按名称
+    tag   // 按标签
 }
 
+/// <summary>
+/// 独立开关的标识符。
+/// </summary>
 public enum IndependentSwitch
 {
     switchA,
@@ -77,8 +102,10 @@ public enum IndependentSwitch
     switchD
 }
 
-//事件类型
-// 加的时候从尾部加，否则会把之前做好的顺序打乱
+/// <summary>
+/// 事件系统中所有可用的事件类型。
+/// </summary>
+// 添加新事件时，请从尾部添加，否则会打乱已保存的事件数据中的顺序。
 public enum eventType
 {
     none,
@@ -124,6 +151,9 @@ public enum eventType
     ShowChoices // 显示多项选择框
 }
 
+/// <summary>
+/// 角色组件类型。
+/// </summary>
 public enum actorComponentType
 {
     basicMove,
@@ -131,6 +161,9 @@ public enum actorComponentType
     followBehaviour
 }
 
+/// <summary>
+/// 事件条件判断的变量类型。
+/// </summary>
 public enum conditionType
 {
     Switch,
@@ -139,43 +172,55 @@ public enum conditionType
     IndependentSwitch
 }
 
-// 出现条件
+/// <summary>
+/// 多个条件之间的连接逻辑。
+/// </summary>
 public enum connect
 {
-    and,
-    or
+    and, // 与
+    or   // 或
 }
 
+/// <summary>
+/// 数值比较方式。
+/// </summary>
 public enum compare
 {
-    larger,
-    less,
-    equal,
-    notEqual
+    larger,     // 大于
+    less,       // 小于
+    equal,      // 等于
+    notEqual    // 不等于
 }
 
-// =================================== hashs ===================================
+// =================================== 属性名常量 ===================================
+// 使用常量类来存储属性名字符串，可以避免手写错误并方便重构。
 
+/// <summary>
+/// 数据字典的名称。
+/// </summary>
 public class dictionaryName
 {
     public static string before = "_";
 
-    // gameDic
+    // 游戏数据字典
     public static string items = "items";
     public static string quests = "quests";
 
-    //dataDic
+    // 全局变量字典
     public static string ints = "ints";
     public static string doubles = "doubles";
     public static string switchs = "switchs";
     public static string vec3s = "vec3s";
 
-    //others
+    // 资源字典
     public static string audio = "audio";
     public static string image = "image";
     public static string prefab = "prefab";
 }
 
+/// <summary>
+/// 通用属性名。
+/// </summary>
 public class propertyName
 {
     public static string name = dictionaryName.before + "name";
@@ -184,6 +229,9 @@ public class propertyName
     public static string pitch = dictionaryName.before + "pitch";
 }
 
+/// <summary>
+/// 道具的属性名。
+/// </summary>
 public class itemProperty
 {
     public static string name = dictionaryName.before + "name";
@@ -195,6 +243,9 @@ public class itemProperty
     public static string eventNum = dictionaryName.before + "eventNum";
 }
 
+/// <summary>
+/// 任务的属性名。
+/// </summary>
 public class questProperty
 {
     public static string name = dictionaryName.before + "name";
@@ -207,6 +258,9 @@ public class questProperty
     public static string stepNum = dictionaryName.before + "stepNum";
 }
 
+/// <summary>
+/// 事件节点中用于存储参数的通用属性名。
+/// </summary>
 public class structProperty
 {
     public static string type = dictionaryName.before + "type";
@@ -246,11 +300,15 @@ public class structProperty
     public static string conditionType = dictionaryName.before + "conditionType";
 }
 
-// =================================== structs ===================================
+// =================================== 数据结构体 ===================================
 
+/// <summary>
+/// 封装一个事件页的数据和状态。
+/// </summary>
 [System.Serializable]
 public class eventStruct
 {
+    // 事件树 ScriptableObject 的引用
     public dataTree eventList;
 
     // 是否可以反复执行
@@ -264,7 +322,7 @@ public class eventStruct
         }
     }
 
-    //本事件现有进度
+    // 本事件当前执行到的节点
     private TreeNodeInterface thisNow = null;
     public TreeNodeInterface ThisNow
     {
@@ -279,7 +337,7 @@ public class eventStruct
         }
     }
 
-    //事件页是否完成
+    // 事件页是否已完成
     private bool finish = false;
     public bool Finish
     {
@@ -294,7 +352,7 @@ public class eventStruct
         }
     }
 
-    //事件页是否完成
+    // 事件页是否需要被移除
     private bool remove = false;
     public bool Remove
     {
@@ -317,6 +375,9 @@ public class eventStruct
     }
 }
 
+/// <summary>
+/// 封装一个事件触发条件。
+/// </summary>
 [System.Serializable]
 public struct conditionDictionary
 {
@@ -327,8 +388,11 @@ public struct conditionDictionary
     public string value;
 }
 
-// =================================== interfaces ===================================
+// =================================== 接口和基类 ===================================
 
+/// <summary>
+/// 朝向相关的工具类。
+/// </summary>
 public class turnTool
 {
     public static turn get(Vector3 v)
@@ -365,6 +429,9 @@ public class turnTool
     }
 }
 
+/// <summary>
+/// 数据节点的基础接口，定义了通过反射获取数据的方法。
+/// </summary>
 public interface dataNodeInterface
 {
     Type getType(string name);
@@ -372,12 +439,18 @@ public interface dataNodeInterface
     T getData<T>(string name);
 }
 
+/// <summary>
+/// 列表节点的接口。
+/// </summary>
 public interface ListNodeInterface : dataNodeInterface
 {
     string getId();
     int getNodeType();
 }
 
+/// <summary>
+/// 树节点的接口，用于事件系统。
+/// </summary>
 public interface TreeNodeInterface : ListNodeInterface
 {
     TreeNodeInterface getChild(string id);
@@ -392,6 +465,9 @@ public interface TreeNodeInterface : ListNodeInterface
       
 }
 
+/// <summary>
+/// ScriptableObject 基类，用于创建列表类型的资源。
+/// </summary>
 public class dataList : ScriptableObject
 {
     protected List<ListNodeInterface> list = new List<ListNodeInterface>();
@@ -420,6 +496,9 @@ public class dataList : ScriptableObject
     }
 }
 
+/// <summary>
+/// ScriptableObject 基类，用于创建树类型的资源（如事件）。
+/// </summary>
 public class dataTree : ScriptableObject
 {
     protected TreeNodeInterface root;
@@ -437,6 +516,9 @@ public class dataTree : ScriptableObject
     }
 }
 
+/// <summary>
+/// 事件列表的接口，定义了检查触发条件的方法。
+/// </summary>
 public interface EventListInterface
 {
     start getHowToStart();

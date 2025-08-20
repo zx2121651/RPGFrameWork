@@ -7,52 +7,63 @@ using UI;
 
 namespace ManagerSpace
 {
+    /// <summary>
+    /// UI管理器，负责管理游戏中的所有UI面板的显示、隐藏和交互逻辑。
+    /// 这是一个单例类。
+    /// </summary>
     [DisallowMultipleComponent]
     public class UIManager : MonoBehaviour
     {
-        //管理器的实例
+        // UIManager 的静态单例实例
         public static UIManager instance;
 
-        // 2选1 yes no panel
+        // ===================== UI 预制件引用 =====================
+        [Header("UI Prefabs")]
+        // “是/否”二选一面板
         [SerializeField]
         private GameObject choosePanel;
-        //用于淡入淡出的UI
+        // 用于屏幕淡入淡出的黑色面板
         [SerializeField]
         private GameObject BlackPanel;
+        // 用于屏幕淡入淡出的白色面板
         [SerializeField]
         private GameObject WhitePanel;
-        //用于显示文字的UI
+        // 标准对话框/文字面板
         [SerializeField]
         private GameObject TextPanel;
-        //用于显示文字的UI
+        // 特殊文字面板（例如，没有背景的浮动文字）
         [SerializeField]
         private GameObject SpecialTextPanel;
-        //用于提示的UI
+        // 屏幕底部提示框 (例如 "获得 xxx")
         [SerializeField]
         private GameObject hint;
-        //菜单UI
+        // 主菜单UI
         [SerializeField]
         private GameObject menu;
-        //存档UI
+        // 存档/读档UI
         [SerializeField]
         private GameObject save;
-        //显示图片的UI
+        // 用于显示图片的面板
         [SerializeField]
         private GameObject picPanel;
-        // 调查提示框
+        // 场景中可交互对象旁的提示图标
         [SerializeField]
         private GameObject canDoHint;
         // 多选面板的预制件
         [SerializeField]
         private GameObject multiChoosePanel;
 
-        // 显示文字时的音效
+        [Header("Audio")]
+        // 显示文字时的默认打字音效
         [SerializeField]
         private AudioClip show;
 
-        //=====================不可见变量===============================
-        //控制文字显示进度的开关
+        //===================== 内部状态变量 =====================
+        // 控制文字是否显示完毕（用于打字机效果）
         private bool showFinish = true;
+        /// <summary>
+        /// 文字是否已经完全显示（打字机效果结束）。
+        /// </summary>
         public bool ShowFinish
         {
             get
@@ -61,7 +72,11 @@ namespace ManagerSpace
             }
         }
 
+        // 当前对话框是否可以被隐藏
         private bool canHide = false;
+        /// <summary>
+        /// 当前对话框是否可以被隐藏。
+        /// </summary>
         public bool CanHide
         {
             get
@@ -70,26 +85,30 @@ namespace ManagerSpace
             }
         }
 
+        // 存储当前屏幕上显示的所有图片，按名称索引
         private Dictionary<string, GameObject> images = new Dictionary<string, GameObject>();
 
-        //引用
+        // 对当前活动UI面板的引用
         private GameObject blackPanel = null;
         private GameObject whitePanel = null;
         private TextPanel textPanel = null;
         private GameObject menuPanel = null;
+        // 请求显示文本框的组件（用于回调验证）
         private Component textRequest = null;
 
+        // ===================== 委托和事件 =====================
         public delegate void StopSE();
         public delegate void PlaySE(AudioClip clip, float pitch = 1.0f, bool loop = false);
         public delegate void ChangeState(nowState state, GameObject _object = null);
 
+        // 这些委托由其他管理器（如AudioManager, ControlManager）在初始化时赋值
         public StopSE stopSE;
         public PlaySE playSE;
         public ChangeState changeState;
 
         private void Awake()
         {
-            //创造管理器实例
+            // 实现单例模式
             if (instance == null)
             {
                 instance = this;
@@ -103,10 +122,14 @@ namespace ManagerSpace
 
         public void init()
         {
-
+            // 初始化方法，目前为空
         }
 
-        //淡入，使用协程执行，可能需要手动写等待时间
+        /// <summary>
+        /// 执行屏幕淡入效果。
+        /// </summary>
+        /// <param name="time">淡入持续时间。</param>
+        /// <param name="black">true表示使用黑色面板，false表示使用白色面板。</param>
         public void beBlack(float time, bool black)
         {
             if (black)
@@ -145,7 +168,11 @@ namespace ManagerSpace
             }
         }
 
-        //淡出，使用协程执行，可能需要手动写等待时间
+        /// <summary>
+        /// 执行屏幕淡出效果。
+        /// </summary>
+        /// <param name="time">淡出持续时间。</param>
+        /// <param name="black">true表示使用黑色面板，false表示使用白色面板。</param>
         public void beWhite(float time, bool black)
         {
             if (black)
@@ -186,7 +213,9 @@ namespace ManagerSpace
             }
         }
 
-        //显示文字框
+        /// <summary>
+        /// 显示标准对话框。
+        /// </summary>
         public void showTextPanel(Component _object, string name, string text, Sprite sprite, AudioClip se = null, float p = 1.0f, bool _new = false)
         {
             AudioClip s;
@@ -224,7 +253,9 @@ namespace ManagerSpace
             StartCoroutine(showText(text, 0.05f, s, p));
         }
 
-        //显示文字框
+        /// <summary>
+        /// 显示特殊对话框（例如，没有背景）。
+        /// </summary>
         public void showSpecialTextPanel(Component _object, string text, Vector2 pos, AudioClip se = null, float p = 1.0f)
         {
             AudioClip s;
@@ -248,7 +279,9 @@ namespace ManagerSpace
             StartCoroutine(showText(text, 0.05f, s, p));
         }
 
-        //隐藏文字框
+        /// <summary>
+        /// 隐藏当前显示的对话框。
+        /// </summary>
         public void hideTextPanel()
         {
             if (textPanel != null)
@@ -266,9 +299,12 @@ namespace ManagerSpace
             canHide = false;
         }
 
+        /// <summary>
+        /// 使用打字机效果显示文本的协程。
+        /// </summary>
         IEnumerator showText(string text, float showCharTime, AudioClip se, float p)
         {
-            // 读两个字符麻烦，偷懒
+            // 此处为复杂的文本解析逻辑，用于处理颜色、大小、停顿等富文本标签
             if (string.IsNullOrEmpty(text))
             {
                 textPanel.setMainText("");
@@ -394,6 +430,9 @@ namespace ManagerSpace
             canHide = true;
         }
 
+        /// <summary>
+        /// 在屏幕底部显示一个短暂的提示信息。
+        /// </summary>
         public void showHint(string text, int windowSize, int oriSize)
         {
             GameObject go = GameObject.Instantiate(hint) as GameObject;
@@ -403,18 +442,26 @@ namespace ManagerSpace
             Destroy(go, 3);
         }
 
-        //直接显示完成所有文字
+        /// <summary>
+        /// 跳过打字机效果，直接显示全部文字。
+        /// </summary>
         public void skip()
         {
             showFinish = true;
             stopSE();
         }
 
+        /// <summary>
+        /// 检查请求显示文本框的组件是否为指定的组件。
+        /// </summary>
         public bool checkTextRequet(Component _object)
         {
             return (_object == textRequest);
         }
 
+        /// <summary>
+        /// 显示主菜单。
+        /// </summary>
         public void showMenuPanel()
         {
             GameObject go = GameObject.Instantiate(menu) as GameObject;
@@ -424,6 +471,9 @@ namespace ManagerSpace
             changeState(nowState.window, menuPanel.gameObject);
         }
 
+        /// <summary>
+        /// 显示存档/读档界面。
+        /// </summary>
         public void showSavePanel()
         {
             GameObject go = GameObject.Instantiate(save) as GameObject;
@@ -432,7 +482,9 @@ namespace ManagerSpace
             changeState(nowState.window, go);
         }
 
-        //显示任意菜单
+        /// <summary>
+        /// 显示一个任意的UI面板。
+        /// </summary>
         public GameObject showAnyPanel(GameObject _panel, Vector2 _pos, bool mainUI, nowState nowstate)
         {
             if (nowstate != nowState.window || mainUI)
@@ -452,6 +504,9 @@ namespace ManagerSpace
                 return null;
         }
 
+        /// <summary>
+        /// 在指定世界坐标处显示一个可交互提示图标。
+        /// </summary>
         public GameObject showCanDoHint(Vector3 _pos)
         {
             GameObject go = GameObject.Instantiate(canDoHint) as GameObject;
@@ -467,6 +522,9 @@ namespace ManagerSpace
             return go;
         }
 
+        /// <summary>
+        /// 显示一个全屏的纯色块，通常用于闪屏效果。
+        /// </summary>
         public GameObject showFlash(Color c, float time)
         {
             GameObject go = GameObject.Instantiate(picPanel) as GameObject;
@@ -478,6 +536,9 @@ namespace ManagerSpace
             return go;
         }
 
+        /// <summary>
+        /// 在屏幕上显示一张图片。
+        /// </summary>
         public GameObject showPicPanel(string index, Vector2 _pos, Sprite sp, float a)
         {
             GameObject go = GameObject.Instantiate(picPanel) as GameObject;
@@ -492,11 +553,17 @@ namespace ManagerSpace
             return go;
         }
 
+        /// <summary>
+        /// 移动并/或改变已显示图片的透明度。
+        /// </summary>
         public void movePicPanel(string index, Vector2 pos, float a, float time)
         {
             images[index].GetComponent<PicPanel>().movePic(pos, a, time);
         }
 
+        /// <summary>
+        /// 隐藏并销毁指定的图片。
+        /// </summary>
         public void hidePicPanel(string index)
         {
             GameObject g = images[index];
@@ -504,6 +571,9 @@ namespace ManagerSpace
             Destroy(g);
         }
 
+        /// <summary>
+        /// 显示一个“是/否”二选一的确认框。
+        /// </summary>
         public void showChoosePanel(string text, Func yes, Func no, nowState nowstate, GameObject mainPanel = null, bool black = false)
         {
             GameObject g = showAnyPanel(choosePanel, Vector2.zero, true, nowstate) as GameObject;
@@ -516,6 +586,9 @@ namespace ManagerSpace
                 c.BlackBackground();
         }
 
+        /// <summary>
+        /// 获取当前主菜单的引用。
+        /// </summary>
         public GameObject getMainMenu()
         {
             if (menuPanel != null && menuPanel.activeInHierarchy)
@@ -526,6 +599,9 @@ namespace ManagerSpace
                 return null;
         }
 
+        /// <summary>
+        /// 设置主菜单的引用。
+        /// </summary>
         public void setMainMenu(GameObject menu)
         {
             menuPanel = menu;
