@@ -111,25 +111,61 @@ public class BattleManager : MonoBehaviour
     {
         state = BattleState.Busy;
 
+        // For now, we will assume the first skill is used for the "Skill" command
+        // A proper implementation would show a skill selection menu.
+        skillDictionary skillToUse = null;
+        if (command == CommandMenu.Command.Skill)
+        {
+             var skillListAsset = Resources.Load<skillListDefine>("Data/Skill List");
+             if(skillListAsset != null && skillListAsset.datalist.Count > 0)
+             {
+                skillToUse = skillListAsset.datalist[0];
+             }
+             else
+             {
+                Debug.Log("没有找到技能！");
+                state = BattleState.PlayerTurn;
+                PlayerTurn();
+                yield break;
+             }
+        }
+
+        // Play Animation
+        if (skillToUse != null)
+        {
+            yield return StartCoroutine(PlaySkillAnimation(skillToUse, playerCombatant, enemyCombatant));
+        }
+
+        // Apply Effect
         if (command == CommandMenu.Command.Attack)
         {
             int damage = playerCombatant.baseStats.attack - enemyCombatant.baseStats.defense;
             if (damage < 0) damage = 1;
-
             Debug.Log(playerCombatant.unitName + " 攻击 " + enemyCombatant.unitName + "，造成 " + damage + " 点伤害！");
             bool isDead = enemyCombatant.TakeDamage(damage);
-
             yield return new WaitForSeconds(1f);
 
             if (isDead)
             {
                 state = BattleState.Won;
                 EndBattle();
+                yield break;
             }
-            else
+        }
+        else if (command == CommandMenu.Command.Skill && skillToUse != null)
+        {
+            // Simplified skill logic
+            int damage = skillToUse.power + playerCombatant.baseStats.attack - enemyCombatant.baseStats.defense;
+            if (damage < 0) damage = 1;
+            Debug.Log(playerCombatant.unitName + " 使用技能 " + skillToUse.name + "，造成 " + damage + " 点伤害！");
+            bool isDead = enemyCombatant.TakeDamage(damage);
+            yield return new WaitForSeconds(1f);
+
+            if (isDead)
             {
-                state = BattleState.EnemyTurn;
-                StartCoroutine(EnemyTurn());
+                state = BattleState.Won;
+                EndBattle();
+                yield break;
             }
         }
         else
@@ -138,7 +174,57 @@ public class BattleManager : MonoBehaviour
             yield return new WaitForSeconds(1f);
             state = BattleState.PlayerTurn;
             PlayerTurn();
+            yield break;
         }
+
+        // Switch to next turn
+        state = BattleState.EnemyTurn;
+        StartCoroutine(EnemyTurn());
+    }
+
+    private IEnumerator PlaySkillAnimation(skillDictionary skill, Combatant caster, Combatant target)
+    {
+        if (string.IsNullOrEmpty(skill.effectPrefabName))
+        {
+            yield break; // No animation to play
+        }
+
+        GameObject effectPrefab = ManagerSpace.MIFactory.getMI().findPrefab(skill.effectPrefabName);
+        if (effectPrefab == null)
+        {
+            Debug.LogError("找不到技能效果预制件: " + skill.effectPrefabName);
+            yield break;
+        }
+
+        Vector3 casterPos = caster.hud.transform.position; // Simplified position
+        Vector3 targetPos = target.hud.transform.position; // Simplified position
+
+        switch (skill.animationType)
+        {
+            case SkillAnimationType.OnSelf:
+                Instantiate(effectPrefab, casterPos, Quaternion.identity);
+                break;
+
+            case SkillAnimationType.OnTarget:
+                Instantiate(effectPrefab, targetPos, Quaternion.identity);
+                break;
+
+            case SkillAnimationType.Projectile:
+                GameObject projectile = Instantiate(effectPrefab, casterPos, Quaternion.identity);
+                float travelTime = 0.5f;
+                float elapsedTime = 0;
+                while (elapsedTime < travelTime)
+                {
+                    projectile.transform.position = Vector3.Lerp(casterPos, targetPos, elapsedTime / travelTime);
+                    elapsedTime += Time.deltaTime;
+                    yield return null;
+                }
+                Destroy(projectile);
+                // Optionally, instantiate an impact effect here
+                break;
+        }
+
+        yield return new WaitForSeconds(1.0f); // Wait for the animation to be visible
     }
 
     private IEnumerator EnemyTurn()

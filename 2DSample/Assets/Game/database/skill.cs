@@ -18,6 +18,16 @@ namespace BaseData
     }
 
     /// <summary>
+    /// 定义技能动画的播放方式。
+    /// </summary>
+    public enum SkillAnimationType
+    {
+        OnSelf,     // 在使用者身上播放
+        OnTarget,   // 在目标身上播放
+        Projectile  // 作为投射物飞向目标
+    }
+
+    /// <summary>
     /// 定义“技能”的数据结构。
     /// </summary>
     [System.Serializable]
@@ -49,6 +59,21 @@ namespace BaseData
         public string _commonEvent
         {
             get { return commonEvent; }
+        }
+
+        [Header("技能动画设置")]
+        // 技能动画的播放类型
+        public SkillAnimationType animationType = SkillAnimationType.OnTarget;
+        public SkillAnimationType _animationType
+        {
+            get { return animationType; }
+        }
+
+        // 技能效果的预制件名称（需在资源管理器中注册）
+        public string effectPrefabName = "";
+        public string _effectPrefabName
+        {
+            get { return effectPrefabName; }
         }
     }
 
@@ -85,6 +110,11 @@ namespace BaseData
             e.power = EditorGUILayout.IntField("威力", e.power);
             e.mpCost = EditorGUILayout.IntField("MP消耗", e.mpCost);
             e.commonEvent = EditorGUILayout.TextField("关联公共事件", e.commonEvent);
+
+            EditorGUILayout.Space();
+            EditorGUILayout.LabelField("动画设置", EditorStyles.boldLabel);
+            e.animationType = (SkillAnimationType)EditorGUILayout.EnumPopup("动画类型", e.animationType);
+            e.effectPrefabName = EditorGUILayout.TextField("效果预制件名称", e.effectPrefabName);
         }
     }
 #endif
