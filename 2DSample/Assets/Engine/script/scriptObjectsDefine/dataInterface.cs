@@ -148,7 +148,8 @@ public enum eventType
     setFollow,
     changeTeam,
     changeGlobalVector3,
-    ShowChoices // 显示多项选择框
+    ShowChoices, // 显示多项选择框
+    StartBattle // 开始一场战斗
 }
 
 /// <summary>

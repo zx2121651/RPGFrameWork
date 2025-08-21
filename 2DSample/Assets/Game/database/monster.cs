@@ -35,6 +35,13 @@ namespace BaseData
         {
             get { return defense; }
         }
+
+        // 引用怪物的战斗属性
+        public ActorStats stats;
+        public ActorStats _stats
+        {
+            get { return stats; }
+        }
     }
 
     /// <summary>
@@ -75,6 +82,9 @@ namespace BaseData
             e.hp = EditorGUILayout.IntField("生命值", e.hp);
             e.attack = EditorGUILayout.IntField("攻击力", e.attack);
             e.defense = EditorGUILayout.IntField("防御力", e.defense);
+
+            // 在编辑器中添加一个字段来分配 ActorStats 资源
+            e.stats = (ActorStats)EditorGUILayout.ObjectField("战斗属性", e.stats, typeof(ActorStats), false);
         }
     }
 #endif

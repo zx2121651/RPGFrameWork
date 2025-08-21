@@ -337,6 +337,31 @@ namespace Actions
                     pushNow(true);
                     break;
 
+                case eventType.StartBattle:
+                    // 从Resources文件夹加载指定的敌人队伍资源
+                    EnemyGroup enemyGroup = Resources.Load<EnemyGroup>("EnemyGroups/" + e.str1);
+                    if (enemyGroup != null)
+                    {
+                        // 检查BattleManager实例是否存在
+                        if (BattleManager.instance != null)
+                        {
+                            BattleManager.instance.StartBattle(enemyGroup.enemies);
+                            // 通常战斗开始后，事件流会暂停，由BattleManager接管
+                            // 此处不调用 pushNow()，等待战斗结束后再决定后续事件
+                        }
+                        else
+                        {
+                            Debug.LogError("BattleManager instance not found!");
+                            pushNow(true); // 发生错误，继续执行后续事件以避免卡死
+                        }
+                    }
+                    else
+                    {
+                        Debug.LogError("EnemyGroup asset not found in Resources: " + e.str1);
+                        pushNow(true);
+                    }
+                    break;
+
                // default 会造成混乱，严禁出现
             }
         }

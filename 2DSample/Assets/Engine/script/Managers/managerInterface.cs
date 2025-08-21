@@ -105,6 +105,7 @@ public struct PlayerInfo
     public GameObject playerPrefab;
     public Sprite face;
     public Sprite avator;
+    public ActorStats stats; // 角色的战斗属性
 }
 
 public class changeSceneDo
