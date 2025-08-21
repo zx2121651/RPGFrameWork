@@ -3,6 +3,8 @@
 
 **如果您是第一次使用本框架，请务必阅读 [新手入门指南 (USER_MANUAL.md)](USER_MANUAL.md)！**
 
+**想快速开始一个新关卡？请查看 [模板场景使用指南 (SCENE_TEMPLATES_GUIDE.md)](SCENE_TEMPLATES_GUIDE.md)。**
+
 **新增2.5D游戏开发支持！请查看 [2.5D 示例场景设置指南](2.5D_SETUP_GUIDE.md) 以了解详情。**
 
 <br/>
