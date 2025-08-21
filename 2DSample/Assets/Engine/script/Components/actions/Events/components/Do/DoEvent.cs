@@ -110,6 +110,31 @@ namespace Actions
                     }
                     break;
 
+                case eventType.GenerateQuest:
+                    if (QuestGenerator.instance != null)
+                    {
+                        var generatedEvent = QuestGenerator.instance.GenerateFetchQuest();
+                        if (generatedEvent != null)
+                        {
+                            // This is where the dynamically created event would be run.
+                            // For now, we just log it.
+                            Debug.Log("Quest event generated, but runtime execution is not fully implemented.");
+                            pushNow(true);
+                        }
+                        else
+                        {
+                            // Generator returned null (e.g. due to architectural constraints)
+                             Debug.LogWarning("QuestGenerator returned a null event. Continuing event flow.");
+                            pushNow(true);
+                        }
+                    }
+                    else
+                    {
+                        Debug.LogError("QuestGenerator instance not found!");
+                        pushNow(true);
+                    }
+                    break;
+
                 // =============================== 场景与玩家控制 ===============================
                 // 开始玩家控制
                 case eventType.startUserControl: pushNow(true); startUserControl(); break;
@@ -318,7 +343,7 @@ namespace Actions
                         GameObject g2 = Instantiate(getSystemSetting().PlayerInfos[e.int1].playerPrefab);
                         g2.transform.position = g.transform.position;
                         setFollow(g2, e.bool1);
-                    }                  
+                    }
                     pushNow(true);
                     break;
 
@@ -358,6 +383,29 @@ namespace Actions
                     else
                     {
                         Debug.LogError("EnemyGroup asset not found in Resources: " + e.str1);
+                        pushNow(true);
+                    }
+                    break;
+
+                case eventType.GenerateAndRunQuest:
+                    if (QuestGenerator.instance != null)
+                    {
+                        dataTree questTree = QuestGenerator.instance.GenerateFetchQuest();
+                        if (questTree != null)
+                        {
+                            // We have a new event tree. We need to start it.
+                            // The best way is to push its root to the execution stack.
+                            pushNow(true, questTree.getRoot());
+                        }
+                        else
+                        {
+                            // Generation failed, just continue
+                            pushNow(true);
+                        }
+                    }
+                    else
+                    {
+                        Debug.LogError("QuestGenerator instance not found!");
                         pushNow(true);
                     }
                     break;

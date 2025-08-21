@@ -149,7 +149,8 @@ public enum eventType
     changeTeam,
     changeGlobalVector3,
     ShowChoices, // 显示多项选择框
-    StartBattle // 开始一场战斗
+    StartBattle, // 开始一场战斗
+    GenerateQuest // 动态生成一个任务
 }
 
 /// <summary>
@@ -514,6 +515,14 @@ public class dataTree : ScriptableObject
     public TreeNodeInterface getRoot()
     {
         return root;
+    }
+
+    /// <summary>
+    /// Sets the root node of the tree, for dynamic creation.
+    /// </summary>
+    public void setRoot(TreeNodeInterface newRoot)
+    {
+        this.root = newRoot;
     }
 }
 
